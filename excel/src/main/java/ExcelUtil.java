@@ -5,7 +5,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -20,7 +19,7 @@ public class ExcelUtil {
      */
     public static List<List<String>> readExcel(String filePath, int beginNum) throws Exception {
 
-        ArrayList<List<String>> list = new ArrayList<>();
+        ArrayList<List<String>> list = new ArrayList();
         //1、获取文件输入流
         InputStream inputStream = new FileInputStream(filePath);
         //2、获取Excel工作簿对象
@@ -37,12 +36,15 @@ public class ExcelUtil {
                 }
                 //读取当前行中单元格数据，索引从0开始
                 short lastCellNum = row.getLastCellNum();
-                List<String> list1 = new ArrayList<>();
+                List<String> list1 = new ArrayList();
                 for (int i = 0; i < lastCellNum; i++) {
                     Cell cell = row.getCell(i);
-                    cell.setCellType(CellType.STRING);
-
-                    list1.add(cell.getStringCellValue());
+                    if (cell != null){
+                        cell.setCellType(CellType.STRING);
+                        list1.add(cell.getStringCellValue());
+                    }else{
+                        list1.add("");
+                    }
                 }
                 list.add(list1);
 
@@ -83,13 +85,18 @@ public class ExcelUtil {
     public static void findRepeatRecord(char[] args, String filePath) throws Exception {
         List<List<String>> lists = readExcel(filePath, 0);
         //找到数据相同的数组
-        Set<String> set = new HashSet<>();
+        Set<String> set = new HashSet<String>();
 
+        //设置行号
         Integer rowNumber = 0;
         for (List<String> list : lists) {
             rowNumber ++;
             String key = "";
             for (char str : args) {
+                 if (str-97>list.size()){
+                    System.out.println("第"+rowNumber+"行，列不够");
+                    continue;
+                }
                 key += list.get(str - 97);
             }
             if (!set.contains(key)) {
@@ -100,18 +107,31 @@ public class ExcelUtil {
 
         }
     }
-
-    public static void main(String[] args) throws Exception {
-        //String filePath = "C:\\Users\\yangmf\\resource\\document\\ceshi.xlsx";
-        //List<List<String>> lists = readExcel("C:\\Users\\yangmf\\resource\\document\\ceshi.xlsx", 0);
-        // printExcel(lists);
-        //char[] sz = {'a'};
+    public static void menu()throws Exception{
+        System.out.println("**************************************************************");
+        System.out.println("*                                                            *");
+        System.out.println("*                                                            *");
+        System.out.println("*                 Excel处理工具                               *");
+        System.out.println("*                                                            *");
+        System.out.println("*                                                            *");
+        System.out.println("**************************************************************");
+        System.out.println("请选择处理方式:");
+        System.out.println("1 查看Excel重复列");
         Scanner sn = new Scanner(System.in);
-        System.out.println("请输入文件路径：");
-        String file = sn.next();
+        int i = sn.nextInt();
+        switch (i){
+            case 1:
+                System.out.println("请输入文件路径：");
+                String file = sn.next();
+                System.out.println("请输入判定列名：");
+                char[] chars = sn.next().toCharArray();
+                findRepeatRecord(chars,file);
+                break;
 
-        System.out.println("请输入判定列名：");
-        char[] chars = sn.next().toCharArray();
-        findRepeatRecord(chars,file);
+        }
+    }
+    public static void main(String[] args) throws Exception {
+        menu();
+
     }
 }
