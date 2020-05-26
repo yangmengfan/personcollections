@@ -93,10 +93,7 @@ public class ExcelUtil {
             rowNumber ++;
             String key = "";
             for (char str : args) {
-                 if (str-97>list.size()){
-                    System.out.println("第"+rowNumber+"行，列不够");
-                    continue;
-                }
+
                 key += list.get(str - 97);
             }
             if (!set.contains(key)) {
